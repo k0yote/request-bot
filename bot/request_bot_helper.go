@@ -3,6 +3,7 @@ package bot
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -41,12 +42,14 @@ func makeRequestList(requestURL string, requestCount int) ([]string, error) {
 	return endpoints, nil
 }
 
-func botRequest(endpoints []string, customHeader *CustomHeader, reqBody []byte) ([]RequestCh, error) {
+func botRequest(endpoints []string, customHeader *CustomHeader) ([]RequestCh, error) {
 	done := make(chan RequestCh, len(endpoints))
 	errch := make(chan error, len(endpoints))
 	for _, endpoint := range endpoints {
 		go func(endpoint string) {
+			reqBody, _ := reqBody()
 			b, err := request(endpoint, customHeader, reqBody)
+			fmt.Println(string(b))
 			if err != nil {
 				errch <- err
 				done <- RequestCh{}
@@ -63,7 +66,7 @@ func botRequest(endpoints []string, customHeader *CustomHeader, reqBody []byte) 
 
 	botRequestArr := make([]RequestCh, 0)
 	var errStr string
-	for i := 0; i < len(botRequestArr); i++ {
+	for i := 0; i < len(endpoints); i++ {
 		botRequestArr = append(botRequestArr, <-done)
 		if err := <-errch; err != nil {
 			errStr = errStr + " " + err.Error()

@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"time"
@@ -23,25 +22,23 @@ func newRequestBot(opts *RequestBotOptions) (*RequestBot, error) {
 	}, nil
 }
 
-func (d RequestBot) BotRequest(reqBody []byte) error {
+func (d RequestBot) BotRequest() error {
 	maxPage := d.GetRequestMaxPage()
-
 	botRequestCount := 0
 	for i := 1; i <= maxPage; i++ {
 		endpoints, _, _ := pagination(d.requestBotHelper.endpoints, i, fetchRequestLimit)
-
-		botRequestList, err := botRequest(endpoints, d.requestBotHelper.customHeader, reqBody)
+		botRequestList, err := botRequest(endpoints, d.requestBotHelper.customHeader)
 		if err != nil {
 			return err
 		}
 
-		for _, attack := range botRequestList {
-			fmt.Println(string(attack.Endpoint))
-			fmt.Println(string(attack.Data))
-		}
+		// for _, attack := range botRequestList {
+		// 	fmt.Println(string(attack.Endpoint))
+		// 	fmt.Println(string(attack.Data))
+		// }
 
 		botRequestCount += len(botRequestList)
-		log.Println("attacked count: ", botRequestCount)
+		log.Println("bot request count: ", botRequestCount)
 		time.Sleep(waitTime)
 	}
 
